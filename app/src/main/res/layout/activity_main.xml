@@ -1,237 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:fitsSystemWindows="true"
+    tools:openDrawer="start">
 
-    <LinearLayout
+    <include
+        layout="@layout/app_bar_main"
         android:layout_width="match_parent"
-        android:layout_height="120dp"
-        android:layout_weight="0"
-        android:orientation="horizontal">
+        android:layout_height="match_parent" />
 
-        <TextView
-            android:id="@+id/et_input"
+    <android.support.design.widget.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true">
+
+        <include
+            layout="@layout/nav_header_main"
             android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:textSize="20sp" />
-    </LinearLayout>
+            android:layout_height="match_parent" />
+    </android.support.design.widget.NavigationView>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:layout_weight="0"
-        android:orientation="horizontal"
-        android:weightSum="4">
-
-        <Button
-            android:id="@+id/btn_clear"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="#919191"
-            android:text="@string/clear"
-            android:textSize="30sp" />
-
-        <Button
-            android:id="@+id/btn_plus"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="#919191"
-            android:text="@string/plus"
-            android:textSize="30sp" />
-
-        <Button
-            android:id="@+id/btn_reduce"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="#919191"
-            android:text="@string/reduce"
-            android:textSize="30sp" />
-
-        <Button
-            android:id="@+id/btn_delete"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="#919191"
-            android:text="@string/delete"
-            android:textSize="30sp" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="80dp"
-        android:layout_weight="0"
-        android:gravity="center"
-        android:weightSum="4">
-
-        <Button
-            android:id="@+id/btn_seven"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="#ffffff"
-            android:text="@string/seven"
-            android:textSize="30sp" />
-
-        <Button
-            android:id="@+id/btn_eight"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="#ffffff"
-            android:text="@string/eight"
-            android:textSize="30sp" />
-
-        <Button
-            android:id="@+id/btn_ninee"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="#ffffff"
-            android:text="@string/nine"
-            android:textSize="30sp" />
-
-        <Button
-            android:id="@+id/btn_mul"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="#919191"
-            android:text="@string/mul"
-            android:textSize="30sp" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="80dp"
-        android:layout_weight="0"
-        android:gravity="center"
-        android:weightSum="4">
-
-        <Button
-            android:id="@+id/btn_four"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="#ffffff"
-            android:text="@string/four"
-            android:textSize="30sp" />
-
-        <Button
-            android:id="@+id/btn_five"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="#ffffff"
-            android:text="@string/five"
-            android:textSize="30sp" />
-
-        <Button
-            android:id="@+id/btn_six"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="#ffffff"
-            android:text="@string/six"
-            android:textSize="30sp" />
-
-        <Button
-            android:id="@+id/btn_excep"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="#919191"
-            android:text="@string/except"
-            android:textSize="30sp" />
-    </LinearLayout>
-
-    <LinearLayout
-
-        android:layout_width="fill_parent"
-        android:layout_height="80dp"
-        android:layout_weight="0"
-        android:layout_gravity="center"
-        android:weightSum="4">
-
-        <Button
-            android:id="@+id/btn_one"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="@string/one"
-            android:textSize="30sp"
-            android:background="#ffffff"/>
-
-        <Button
-            android:id="@+id/btn_two"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="@string/two"
-            android:textSize="30sp"
-            android:background="#ffffff"/>
-
-        <Button
-            android:id="@+id/btn_three"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="@string/three"
-            android:textSize="30sp"
-            android:background="#ffffff"/>
-
-        <Button
-            android:id="@+id/btn_model"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="@string/model"
-            android:textSize="30sp"
-            android:background="#919191"/>
-
-    </LinearLayout>
-
-
-    <LinearLayout
-
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:layout_weight="0"
-        android:layout_gravity="center"
-        android:weightSum="3">
-
-        <Button
-            android:id="@+id/btn_point"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="@string/point"
-            android:textSize="30sp"
-            android:background="#ffffff"/>
-
-        <Button
-            android:id="@+id/btn_zero"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="@string/zero"
-            android:textSize="30sp"
-            android:background="#ffffff"/>
-
-        <Button
-            android:id="@+id/btn_equal"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="@string/equal"
-            android:textSize="30sp"
-            android:background="#3B8BFF"/>
-
-    </LinearLayout>
-
-</LinearLayout>
-
+</android.support.v4.widget.DrawerLayout>
