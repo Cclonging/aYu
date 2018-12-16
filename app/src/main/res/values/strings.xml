@@ -1,9 +1,25 @@
 <resources>
-    <string name="app_name">aYu_weather</string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
-    <string name="nav_header_desc">Navigation header</string>
-    <string name="action_settings">Settings</string>
+    <string name="app_name">Calculator</string>
+    <string name="clear">C</string>
+    <string name="except">/</string>
+    <string name="mul">X</string>
+    <string name="delete">Del</string>
+    <string name="plus">+</string>
+    <string name="reduce">-</string>
+    <string name="equal">=</string>
+    <string name="model">%</string>
+    <string name="point">.</string>
+    <string name="zero">0</string>
+    <string name="one">1</string>
+    <string name="two">2</string>
+    <string name="three">3</string>
+    <string name="four">4</string>
+    <string name="five">5</string>
+    <string name="six">6</string>
+    <string name="seven">7</string>
+    <string name="eight">8</string>
+    <string name="nine">9</string>
+
+    <string name="buttonSize">30sp</string>
+    <string name="buttonHeight">80dp</string>
 </resources>
