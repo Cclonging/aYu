@@ -2,6 +2,11 @@ package com.alibaba.com.ayu_weather.db;
 
 import org.litepal.crud.LitePalSupport;
 
+/**
+ * 县/区pojo
+ * @author aYu
+ * @date 2018-12-16
+ */
 public class County extends LitePalSupport {
 
     private int id;

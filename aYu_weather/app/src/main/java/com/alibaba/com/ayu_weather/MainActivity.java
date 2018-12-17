@@ -1,6 +1,9 @@
 package com.alibaba.com.ayu_weather;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.view.View;
@@ -12,6 +15,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
+
+import com.alibaba.com.ayu_weather.fragment.ChooseAreaFrame;
+import com.alibaba.com.ayu_weather.gson.Weather;
+import com.alibaba.com.ayu_weather.util.JSONUtil;
+import com.bumptech.glide.Glide;
+
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -40,6 +51,17 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        //先从缓存里读取数据
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String weatherStr = preferences.getString("weather",null);
+
+        if (!Objects.isNull(weatherStr)){
+            Intent intent = new Intent(this, WeatherActivity.class);
+            startActivity(intent);
+            finish();
+        }
+
     }
 
     @Override
