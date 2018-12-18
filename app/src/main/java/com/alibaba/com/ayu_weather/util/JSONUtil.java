@@ -3,6 +3,8 @@ package com.alibaba.com.ayu_weather.util;
 import com.alibaba.com.ayu_weather.db.City;
 import com.alibaba.com.ayu_weather.db.County;
 import com.alibaba.com.ayu_weather.db.Province;
+import com.alibaba.com.ayu_weather.gson.Weather;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -91,5 +93,18 @@ public class JSONUtil {
             }
         }
         return false;
+    }
+
+    public static Weather handleWeatherRespone(String response){
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            JSONArray jsonArray = jsonObject.getJSONArray("HeWeather");
+            String weatherContent = jsonArray.getJSONObject(0).toString();
+            System.out.println(weatherContent);
+            return new Gson().fromJson(weatherContent, Weather.class);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

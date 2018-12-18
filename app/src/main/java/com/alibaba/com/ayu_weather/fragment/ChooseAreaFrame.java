@@ -1,7 +1,10 @@
 package com.alibaba.com.ayu_weather.fragment;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -15,6 +18,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.alibaba.com.ayu_weather.MainActivity;
 import com.alibaba.com.ayu_weather.R;
 import com.alibaba.com.ayu_weather.db.City;
 import com.alibaba.com.ayu_weather.db.County;
@@ -94,6 +98,13 @@ public class ChooseAreaFrame extends Fragment {
                         break;
                     case LEVEL_COUNTY:
                         county = counties.get(position);
+                        String weatherId = county.getWeatherId();
+                        Intent intent = new Intent(getActivity(), MainActivity.class);
+                        intent.putExtra("weather_id", weatherId);
+                        //点击item,发送清除缓存中的weather的命令
+                        intent.putExtra("reCommand", "yes");
+                        startActivity(intent);
+                        getActivity().finish();
                         break;
                 }
             }
@@ -116,7 +127,7 @@ public class ChooseAreaFrame extends Fragment {
     }
 
     private void queryProvinces() {
-        title.setText("China/中国");
+        title.setText("中国");
         back.setVisibility(View.GONE);
         provinces = LitePal.findAll(Province.class);
         if (provinces.size() > 0){
