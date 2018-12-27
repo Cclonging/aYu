@@ -34,7 +34,8 @@ public class TestActivity extends Activity {
     List<ImageView> listDoc;
 
     List<ImageView> list;
-    int[] imgArray = { R.drawable.guide1, R.drawable.guide2, R.drawable.guide3};
+    int[] imgArray = { R.drawable.guide1, R.drawable.guide2, R.drawable.guide3
+    };
 
     int count = 0;
     Handler handler = new Handler(){

@@ -2,15 +2,24 @@ package com.alibaba.com.ayu_weather;
 
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.graphics.Typeface;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -29,6 +38,7 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.MediaController;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,15 +48,28 @@ import com.alibaba.com.ayu_weather.gson.Weather;
 import com.alibaba.com.ayu_weather.service.AutoUpdateService;
 import com.alibaba.com.ayu_weather.util.HttpUtils;
 import com.alibaba.com.ayu_weather.util.JSONUtil;
+import com.alibaba.com.ayu_weather.util.Snow;
 import com.bumptech.glide.Glide;
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
+
+import static com.alibaba.com.ayu_weather.R.color.chatBg;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -57,6 +80,8 @@ public class MainActivity extends AppCompatActivity
     private static final String WEATHER_URL = "http://guolin.tech/api/weather?cityid=";
 
     private static final String KEY = "&key=66e75d6f413a40c4a95e18517ec5b058";
+
+    private static final int CHOOSE_PHOTO = 2;
 
     private ScrollView weatherLayout;
 
@@ -70,11 +95,19 @@ public class MainActivity extends AppCompatActivity
 
     private LinearLayout forecastLayout;
 
-    private TextView apiText;
+    private TextView aqiText;
 
     private TextView pm15Text;
 
     private TextView qltText;
+
+    private TextView humText;
+
+    private TextView presText;
+
+    private TextView wdirText;
+
+    private TextView wscText;
 
     private TextView comfortText;
 
@@ -87,6 +120,8 @@ public class MainActivity extends AppCompatActivity
     private SwipeRefreshLayout swipeRefresh;
 
     private String mWeatherId;
+
+    private String mWeather;
 
     private Toolbar toolbar;
 
@@ -102,6 +137,7 @@ public class MainActivity extends AppCompatActivity
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -129,9 +165,13 @@ public class MainActivity extends AppCompatActivity
         degreeText = (TextView) findViewById(R.id.degree_text);
         forecastLayout = (LinearLayout) findViewById(R.id.forecast_layout);
         weatherInfoText = (TextView) findViewById(R.id.weather_info_text);
-        apiText = (TextView) findViewById(R.id.api_text);
+        aqiText = (TextView) findViewById(R.id.aqi_text);
         pm15Text = (TextView) findViewById(R.id.pm25_text);
         qltText = (TextView) findViewById(R.id.qlt_text);
+        humText = (TextView) findViewById(R.id.hum_text);
+        presText = (TextView) findViewById(R.id.pres_text);
+        wdirText = (TextView) findViewById(R.id.wind_dir_text);
+        wscText = (TextView) findViewById(R.id.wind_sc_text);
         comfortText = (TextView) findViewById(R.id.comfort_text);
         carWashText = (TextView) findViewById(R.id.car_wash_text);
         sportText = (TextView) findViewById(R.id.sport_text);
@@ -148,15 +188,12 @@ public class MainActivity extends AppCompatActivity
         if (!Objects.equals("yes", getIntent().getStringExtra("reCommand"))) {
             weatherStr = preferences.getString("weather", null);
         }
-        String bingPic = preferences.getString("bing_pic", null);
-        if (!Objects.isNull(bingPic)){
-            Glide.with(this).load(bingPic).into(bingPicImg);
-        }else {
-            loadBingPic();
-        }
+
         if (!Objects.isNull(weatherStr) && !Objects.equals("",weatherStr)){
             Weather weather = JSONUtil.handleWeatherRespone(weatherStr);
             mWeatherId = weather.basic.weatherId;
+            loadBingPic(weather.now.more.info);
+
             showWeatherInfo(weather);
         }else {
             //没有缓存数据,从服务器读取
@@ -176,6 +213,9 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    /**
+     * 按下返回键
+     */
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -193,6 +233,11 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    /**
+     * 菜单选择项
+     * @param item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -201,6 +246,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
+        //播放音乐
         if (id == R.id.action_settings) {
             final MediaPlayer mediaPlayer = new MediaPlayer();
             if (ContextCompat.checkSelfPermission(MainActivity.this,
@@ -226,13 +272,37 @@ public class MainActivity extends AppCompatActivity
             });
 
             return true;
-        }else if (id == R.id.action_location) {
+        }else if (id == R.id.action_location) { //定位
             requestWeather("CN101190104");
+        }else if (id == R.id.action_changeImg){ //修改图片
+            chooseFromAlbum();
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * 权限校验
+     */
+    private void chooseFromAlbum() {
+        if (ContextCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+        }else {
+            openAblum();
+        }
+    }
+    private void openAblum(){
+        Intent intent = new Intent("android.intent.action.GET_CONTENT");
+        intent.setType("image/*");
+        startActivityForResult(intent, CHOOSE_PHOTO);
+    }
+
+    /**
+     * 初始化播放器
+     * @param mediaPlayer
+     */
     private void initMediaPlayer(MediaPlayer mediaPlayer) {
 
         try{
@@ -269,41 +339,18 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-
-    private void loadBingPic() {
-        HttpUtils.sendOkHttpRequest(PIC_URL, new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(MainActivity.this, "数据获取失败",Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                final String bingPic = response.body().string();
-                SharedPreferences.Editor editor =
-                        PreferenceManager.
-                                getDefaultSharedPreferences(MainActivity.this).edit();
-                editor.putString("bing_pic", bingPic);
-                editor.apply();
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Glide.with(MainActivity.this).load(bingPic).into(bingPicImg);
-                    }
-                });
-            }
-        });
+    /**
+     * 加载pic
+     */
+    private void loadBingPic(String weather) {
+       setBGPic(weather);
     }
 
     /**
      * 处理并展示缓存中的数据
      * @param weather
      */
+    @SuppressLint("ResourceAsColor")
     private void showWeatherInfo(Weather weather) {
         String cityName = weather.basic.cityName;
         String updateTime = weather.basic.update.updateTime.split(" ")[1];
@@ -330,9 +377,13 @@ public class MainActivity extends AppCompatActivity
         }
 
         if (!Objects.isNull(weather.aqi)){
-            apiText.setText(weather.aqi.city.aqi);
-            pm15Text.setText(weather.aqi.city.pm25);
+            aqiText.setText("AIQ " + weather.aqi.city.aqi);
+            pm15Text.setText("PM2.5 " +weather.aqi.city.pm25);
             qltText.setText(weather.aqi.city.qlty);
+            humText.setText("湿度 " + weather.now.hum);
+            presText.setText("压强 " + weather.now.pres);
+            wdirText.setText("风向 " + weather.now.wind_dir);
+            wscText.setText("风力 " + weather.now.wind_sc);
         }
         String comfort = "舒适度: " + weather.suggestion.comfort.info;
         String carWash = "洗车指数: " + weather.suggestion.carWash.info;
@@ -347,6 +398,11 @@ public class MainActivity extends AppCompatActivity
         startService(intent);
     }
 
+    /**
+     * 为天气设置图片
+     * @param infoText
+     * @param info
+     */
     private void setInfoImage(ImageView infoText, String info) {
         if (Objects.equals("晴",info)){
             infoText.setImageDrawable(getResources().getDrawable(R.drawable.sun));
@@ -376,7 +432,7 @@ public class MainActivity extends AppCompatActivity
      * @param weatherId
      */
     public void requestWeather(final String weatherId){
-        loadBingPic();
+
 
         final String weather_url = WEATHER_URL + weatherId + KEY;
         HttpUtils.sendOkHttpRequest(weather_url, new Callback() {
@@ -394,6 +450,7 @@ public class MainActivity extends AppCompatActivity
             public void onResponse(Call call, Response response) throws IOException {
                 final String responseText = response.body().string();
                 final Weather weather = JSONUtil.handleWeatherRespone(responseText);
+
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -404,6 +461,7 @@ public class MainActivity extends AppCompatActivity
                             editor.putString("weather",responseText);
                             editor.apply();
                             mWeatherId = weather.basic.weatherId;
+                            loadBingPic(weather.now.more.info);
                             showWeatherInfo(weather);
                         }else {
                             Toast.makeText(MainActivity.this, "获取天气信息失败",
@@ -414,6 +472,105 @@ public class MainActivity extends AppCompatActivity
                 });
             }
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode){
+            case 1:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    openAblum();
+                }else {
+                    Toast.makeText(this, "你拒绝了授予权限", Toast.LENGTH_SHORT).show();
+                }
+                break;
+                default:
+                    break;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode){
+            case CHOOSE_PHOTO:
+                if (resultCode == RESULT_OK){
+                    handleImageOnKitKat(data);
+                }
+        }
+    }
+
+    /**
+     * 仅仅支持android4.4以上的版本
+     * @param data
+     */
+    private void handleImageOnKitKat(Intent data) {
+        String imagePath = null;
+        Uri uRi = data.getData();
+        if (DocumentsContract.isDocumentUri(this, uRi)){
+            //如果是doc的uri类型, 则通过documentid处理
+            String docId = DocumentsContract.getDocumentId(uRi);
+            if ("com.android.providers.media.documents".equals(uRi.getAuthority())){
+                String id = docId.split(":")[1];
+                String selection = MediaStore.Images.Media._ID + "=" + id;
+                imagePath = getImagePath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, selection);
+            }else if ("com.android.providers.downloads.documents".equals(uRi.getAuthority())){
+                Uri contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"),
+                        Long.valueOf(docId));
+                imagePath = getImagePath(contentUri, null);
+            }
+        }else if ("content".equalsIgnoreCase(uRi.getScheme())){
+            imagePath = getImagePath(uRi, null);
+        }else if ("file".equalsIgnoreCase(uRi.getScheme())){
+            imagePath = uRi.getPath();
+        }
+        displyImage(imagePath);
+    }
+
+    private void displyImage(String imagePath) {
+        Toast.makeText(this, imagePath, Toast.LENGTH_SHORT).show();
+        Glide.with(MainActivity.this).load(imagePath).into(bingPicImg);
+    }
+
+    private String getImagePath(Uri uri, String selection) {
+        String path = null;
+
+        Cursor cursor = getContentResolver().query(uri, null, selection, null, null);
+    if (cursor != null){
+        if (cursor.moveToFirst()){
+            path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+        }
+        cursor.close();
+    }
+    return path;
+    }
+
+    /**
+     * 设置背景图片
+     */
+    public void setBGPic(String info){
+        int id = R.drawable.bg_sun;
+        if (Objects.equals("晴",info)){
+            id = R.drawable.bg_sun;
+        }else if (Objects.equals("多云",info)){
+            id = R.drawable.bg_cloud;
+        }else if (Objects.equals("阴",info)){
+            id = R.drawable.bg_yin;
+        }else if (info.contains("雨")){
+            id = R.drawable.bg_rain;
+        }else if (info.contains("雪")){
+            id = R.drawable.bg_snow;
+        }else if (Objects.equals("雾",info)){
+            id = R.drawable.bg_fork;
+        }
+
+        Glide.with(MainActivity.this).load(id).into(bingPicImg);
+    }
+
+    public String setPath(int id){
+        return ContentResolver.SCHEME_ANDROID_RESOURCE + "://"
+                + getResources().getResourcePackageName(id) + "/"
+                + getResources().getResourceTypeName(id) + "/"
+                + getResources().getResourceEntryName(id);
     }
 
 }

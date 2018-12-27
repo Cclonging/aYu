@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:myview="http://schemas.android.com/apk/res-auto"
     android:layout_marginTop="50dp"
     android:background="@color/colorPrimary"
     tools:context=".MainActivity">
@@ -12,6 +13,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"/>
+
+    <com.alibaba.com.ayu_weather.util.Snow
+        android:id="@+id/flake"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        myview:flakeCount="30"
+        myview:minSize="30"
+        myview:maxSize="70"
+        myview:speedX="5"
+        myview:speedY="6"
+        myview:flakeSrc="@drawable/snow_flake"/>
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh"

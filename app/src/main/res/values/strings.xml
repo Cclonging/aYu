@@ -7,4 +7,5 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">播放音乐</string>
     <string name="action_location">定位</string>
+    <string name="action_changeImg">修改图片</string>
 </resources>
